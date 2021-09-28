@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using Microsoft.Extensions.Logging;
+using Quartz;
 using ServicesModels;
 using System;
 using System.Threading.Tasks;
@@ -8,11 +9,13 @@ namespace Scheduler
     public class Scheduler : ServicesInterfaces.Scheduler.IScheduler
     {
         private readonly IScheduler _scheduler;
+        private readonly ILogger<Scheduler> _logger;
         private string UniqueId { get; set; }
 
-        public Scheduler(IScheduler scheduler)
+        public Scheduler(IScheduler scheduler, ILogger<Scheduler> logger)
         {
             _scheduler = scheduler;
+            _logger = logger;
         }
         public async Task Schedule(Message message)
         {
@@ -26,9 +29,10 @@ namespace Scheduler
 
                 await _scheduler.ScheduleJob(job, likeTrigger);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
+                _logger.LogError(e.Message);
+                _logger.LogTrace(e.StackTrace);
             }
         }
 

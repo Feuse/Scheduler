@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using Microsoft.Extensions.Logging;
+using Quartz;
 using ServicesInterfaces.Scheduler;
 using ServicesModels;
 using System;
@@ -11,10 +12,12 @@ namespace Scheduler
 {
     public class SchedulerJob : IJob
     {
+        private readonly ILogger<SchedulerJob> _logger;
         private IQueue queue;
-        public SchedulerJob(IQueue _queue)
+        public SchedulerJob(IQueue _queue, ILogger<SchedulerJob> logger)
         {
             queue = _queue;
+            _logger = logger;
         }
         public Task Execute(IJobExecutionContext context)
         {
@@ -26,9 +29,11 @@ namespace Scheduler
                 queue.QueueMessage(message);
                 return Task.CompletedTask;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return null;
+                _logger.LogError(e.Message);
+                _logger.LogTrace(e.StackTrace);
+                throw;
             }
         }
     }

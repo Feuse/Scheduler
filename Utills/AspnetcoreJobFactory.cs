@@ -23,7 +23,6 @@ namespace Scheduler
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
