@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Quartz;
 using Quartz.Impl;
+using Quartz.Spi.MongoDbJobStore;
 using ServicesInterfaces.Global;
 using System;
 using System.Collections.Specialized;
@@ -13,6 +14,7 @@ namespace Scheduler
     {
         private static IConfigurationRoot Configuration;
         private static IScheduler _instace = null;
+        public static IAppSettings _settings;
         private static readonly object _padlock = new object();
 
         public static IScheduler Instance
@@ -24,10 +26,9 @@ namespace Scheduler
                 {
                     if (_instace == null)
                     {
-                        NameValueCollection settings = GetSchedulerSettings();
-
+                        NameValueCollection settings = GetSchedulerSettings();       
                         StdSchedulerFactory sche = new StdSchedulerFactory(settings);
-                        _instace = sche.GetScheduler().GetAwaiter().GetResult();
+                        _instace =  sche.GetScheduler().GetAwaiter().GetResult();
                         _instace.Start();
                     }
                 }

@@ -46,39 +46,34 @@ namespace Scheduler
 
         private IJobDetail CreateJob(Message message)
         {
-            try
-            {
+
                 UniqueId = Guid.NewGuid().ToString();
 
                 IJobDetail job = JobBuilder.Create<SchedulerJob>().WithIdentity(UniqueId, "bots").Build();
 
                 job.JobDataMap.Put("message", message);
                 return job;
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
         }
 
         private ITrigger CreateTrigger(Message message, IJobDetail job)
         {
-            try
-            {
-                return TriggerBuilder.Create()
-                        .WithIdentity(UniqueId, "bots")
-                        .StartAt(message.Time).WithSimpleSchedule(x => x
-                        .WithIntervalInHours(24) // tested with interval seconds, working
-                        .WithRepeatCount(message.Repeat- 1)) // -1 because the trigger it self is counting as 1 repeat.
-                        .ForJob(job)
-                        .Build();
-            }
-            catch (Exception)
-            {
 
-                throw;
-            }
+                if (message.Repeat != 0)
+                {
+                    return TriggerBuilder.Create()
+                            .WithIdentity(UniqueId, "bots")
+                            .StartAt(message.Time).WithSimpleSchedule(x => x
+                            .WithIntervalInHours(24)
+                            .WithRepeatCount(message.Repeat - 1)) // -1 because the trigger it self is counting as 1 repeat.
+                            .ForJob(job)
+                            .Build();
+                }
+                return TriggerBuilder.Create()
+                           .WithIdentity(UniqueId, "bots")
+                           .StartAt(message.Time)
+                           .ForJob(job)
+                           .Build();
+
         }
     }
 }
